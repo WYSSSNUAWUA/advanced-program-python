@@ -1,4 +1,4 @@
-# Python Homework .gitignore 
+wher# Python Homework .gitignore 
 .venv/ 
 __pycache__/ 
 *.pyc 
