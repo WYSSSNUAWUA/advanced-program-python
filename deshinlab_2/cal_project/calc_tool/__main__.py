@@ -10,12 +10,14 @@ When run directly, relative imports (from .cli) raise "attempted relative import
 parent package", so we try a relative import first and fall back to absolute imports.
 """
 
+import sys
+
 try:
     # Preferred: running as a package (python -m calc_tool)
     from .cli import parse_args
     from . import operations
 except Exception:
-    # Fallback: running as a script inside the package directory (python __main__.py)
+    # Fallback: running as a script from inside the package directory (python __main__.py)
     # Use absolute imports when relative imports aren't available.
     from cli import parse_args  # type: ignore
     import operations  # type: ignore
@@ -23,13 +25,15 @@ except Exception:
 
 def main(argv=None):
     try:
+        # Parse command-line arguments
         operation, a, b, precision = parse_args(argv)
     except Exception as e:
-        # argparse 会自动打印帮助信息并 exit，若自定义错误则在此捕获
-        print(f"参数解析错误: {e}", file=sys.stderr)
+        # argparse prints help automatically, but this catches custom errors
+        print(f"Argument parsing error: {e}", file=sys.stderr)
         return 2
 
     try:
+        # Execute the requested operation
         if operation == "add":
             result = operations.add(a, b)
         elif operation == "subtract":
@@ -39,17 +43,17 @@ def main(argv=None):
         elif operation == "divide":
             result = operations.divide(a, b)
         else:
-            print(f"未知操作: {operation}", file=sys.stderr)
+            print(f"Unknown operation: {operation}", file=sys.stderr)
             return 3
 
     except ZeroDivisionError as e:
-        print(f"错误: {e}", file=sys.stderr)
+        print(f"Error: {e}", file=sys.stderr)
         return 4
     except Exception as e:
-        print(f"运行时错误: {e}", file=sys.stderr)
+        print(f"Runtime error: {e}", file=sys.stderr)
         return 5
 
-    # 格式化输出（可选保留小数位）
+    # Optional: format the result with a given precision
     if precision is not None:
         try:
             fmt = f"{{:.{precision}f}}"
@@ -62,5 +66,7 @@ def main(argv=None):
     print(output)
     return 0
 
+
 if __name__ == "__main__":
     raise SystemExit(main())
+
